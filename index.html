@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Offline KDP pricing ladder: slide through 10 price points and see per-unit royalty, break-even units, and worst-case monthly revenue side by side.">
+<title>KDP Price Ladder — slide through 10 prices</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <header class="site-header">
+    <h1>KDP Price Ladder</h1>
+    <p class="tagline">Enter your trim, pages, and royalty plan, then slide through
+      10 price points: per-unit royalty, break-even units, and worst-case
+      monthly revenue, side by side.</p>
+    <p class="disclaimer">Local estimates for the US marketplace — not affiliated
+      with Amazon. Verify final figures in your KDP account before pricing.</p>
+  </header>
+
+  <div class="layout">
+    <!-- ===================== PLAN PANEL ===================== -->
+    <section class="panel plan-panel" aria-labelledby="plan-heading">
+      <h2 id="plan-heading">1 · Your royalty plan</h2>
+
+      <div class="field">
+        <label class="field-label" for="format">Format</label>
+        <select id="format" name="format">
+          <option value="ebook">Kindle eBook</option>
+          <option value="paperback">Paperback</option>
+          <option value="hardcover">Hardcover</option>
+        </select>
+      </div>
+
+      <!-- Ebook-only fields -->
+      <div class="field ebook-only">
+        <label class="field-label" for="fileSize">Kindle file size (MB)</label>
+        <input type="number" id="fileSize" name="fileSize" min="0" step="0.1" value="1.5" inputmode="decimal">
+        <p class="hint">Shown on the ebook's pricing page. Amazon charges
+          $0.15&thinsp;/&thinsp;MB delivery against the 70% tier only.</p>
+      </div>
+
+      <!-- Print-only fields -->
+      <div class="print-only"><div>
+        <div class="field">
+          <label class="field-label" for="trim">Trim size</label>
+          <select id="trim" name="trim"></select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="pages">Page count</label>
+          <input type="number" id="pages" name="pages" min="1" step="1" value="280" inputmode="numeric">
+          <p class="hint">Final interior page count (see the page count on a print
+            preview, not your word count).</p>
+        </div>
+        <div class="field">
+          <label class="field-label" for="ink">Ink</label>
+          <select id="ink" name="ink">
+            <option value="black">Black &amp; white</option>
+            <option value="color">Color</option>
+          </select>
+        </div>
+        <div class="field" id="distribution-field">
+          <label class="field-label" for="distribution">Distribution channel</label>
+          <select id="distribution" name="distribution">
+            <option value="amazon">Amazon only (60%)</option>
+            <option value="expanded">Expanded distribution (40%)</option>
+          </select>
+        </div>
+      </div></div>
+
+      <div class="field">
+        <label class="field-label" for="upfront">Upfront costs ($)</label>
+        <input type="number" id="upfront" name="upfront" min="0" step="10" value="500" inputmode="decimal">
+        <p class="hint">Editing, cover design, ads — everything you want the sales
+          ladder to pay back. Leave 0 and break-even is instantly met.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="units">Pessimistic units / month</label>
+        <input type="number" id="units" name="units" min="0" step="1" value="10" inputmode="numeric">
+        <p class="hint">The slow month you can live with. Worst-case monthly
+          revenue = this number × royalty per unit.</p>
+      </div>
+    </section>
+
+    <!-- ===================== LADDER PANEL ===================== -->
+    <section class="panel ladder-panel" aria-labelledby="ladder-heading">
+      <h2 id="ladder-heading">2 · Slide the ladder</h2>
+
+      <div class="presets" role="group" aria-label="Ladder presets">
+        <button type="button" class="preset" data-preset="under5">Ebooks under $5</button>
+        <button type="button" class="preset" data-preset="sweet">The $6.99 sweet spot</button>
+        <button type="button" class="preset" data-preset="launch">$0.99 launch</button>
+      </div>
+
+      <div class="range-row">
+        <div class="field small">
+          <label class="field-label" for="start">Start price ($)</label>
+          <input type="number" id="start" name="start" min="0" max="50" step="0.01" value="3.99" inputmode="decimal">
+        </div>
+        <div class="field small">
+          <label class="field-label" for="step">Step ($)</label>
+          <input type="number" id="step" name="step" min="0.01" max="50" step="0.01" value="0.50" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <label class="field-label" for="ladderSlider">Price point</label>
+        <output id="sliderPrice" class="slider-price" for="ladderSlider">$6.49</output>
+        <input type="range" id="ladderSlider" min="0" max="9" step="1" value="5"
+          aria-describedby="sliderHint">
+        <p class="hint" id="sliderHint">Use the arrows keys to walk the ladder.
+          The highlighted row in the table follows along.</p>
+      </div>
+
+      <div class="spotlight" aria-live="polite">
+        <div class="spot-price">
+          <span class="spot-value" id="spotPrice">$6.49</span>
+          <span class="spot-tier" id="spotTier">70% tier</span>
+        </div>
+        <dl class="spot-metrics">
+          <div class="spot-metric">
+            <dt>Royalty / unit</dt>
+            <dd id="spotRoyalty">$4.09</dd>
+          </div>
+          <div class="spot-metric">
+            <dt>Break-even units</dt>
+            <dd id="spotBreakeven">123</dd>
+          </div>
+          <div class="spot-metric">
+            <dt>Worst-case monthly revenue</dt>
+            <dd id="spotRevenue">$40.90</dd>
+          </div>
+        </dl>
+        <p class="spot-note" id="spotNote"></p>
+      </div>
+
+      <div class="table-wrap">
+        <table id="ladderTable">
+          <caption>10 price points for your current plan</caption>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">List price</th>
+              <th scope="col">Tier</th>
+              <th scope="col" class="num">Costs</th>
+              <th scope="col" class="num">Royalty / unit</th>
+              <th scope="col" class="num">Break-even units</th>
+              <th scope="col" class="num">Worst-case / month</th>
+            </tr>
+          </thead>
+          <tbody id="ladderBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== MATH EXPLAINER ===================== -->
+  <section class="panel explain">
+    <h2>How the math works</h2>
+    <div class="explain-grid">
+      <div>
+        <h3>Kindle eBooks</h3>
+        <p>Amazon pays <strong>70%</strong> of list price for books priced
+          <strong>$2.99–$9.99</strong>, minus a delivery fee of
+          <strong>$0.15 per MB</strong>. Outside that window (like $0.99 or
+          $12.99) you get <strong>35%</strong> with no delivery fee.</p>
+        <p class="formula">royalty × list &minus; (15¢ × MB) <span class="tier-tag">70% tier</span><br>
+          royalty × list <span class="tier-tag">35% tier</span></p>
+      </div>
+      <div>
+        <h3>Paperback &amp; hardcover</h3>
+        <p>Amazon pays <strong>60%</strong> of list on its own store, minus the
+          printing cost: <strong>$0.85 + $0.012 per page</strong> for a standard
+          black-ink paperback (June 2023 US rates). Expanded distribution pays
+          <strong>40%</strong>.</p>
+        <p class="formula">60% × list &minus; printing cost</p>
+      </div>
+      <div>
+        <h3>Break-even</h3>
+        <p>Your upfront costs (editing, cover, ads) divided by royalty per
+          unit, rounded up. That's the number of copies before you've paid
+          yourself back.</p>
+        <p class="formula">break-even units = upfront ÷ royalty</p>
+      </div>
+      <div>
+        <h3>Worst case</h3>
+        <p>Month-in, month-out revenue on your pessimistic unit guess. Plan
+          your marketing on the worst column, celebrate on the best.</p>
+        <p class="formula">worst-case = pessimistic units × royalty</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p>Built by <strong>Asdale Dynamics, LLC</strong> — beginner-friendly AI
+      education, in plain English, step by step, never condescending.
+      <span class="footer-links">Your plan stays in this browser via localStorage;
+      nothing leaves your machine.</span></p>
+  </footer>
+</main>
+
+<noscript>
+  <p style="padding:1rem">This page needs JavaScript to do the ladder math.
+    No network calls, no cookies, no tracking — just local calculations.</p>
+</noscript>
+
+<script src="royalty-math.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

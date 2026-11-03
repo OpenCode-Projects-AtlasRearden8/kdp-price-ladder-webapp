@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- Offline test runner: open this file (tests/test.html) in any browser,
+     even straight from file://. No install, no network. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Royalty math tests — KDP Price Ladder</title>
+<style>
+  :root { color-scheme: light; }
+  body { font-family: Georgia, "Times New Roman", serif; margin: 2rem auto; max-width: 46rem; padding: 0 1rem; color: #23282e; }
+  h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 1.5rem; }
+  .ok { color: #1c6e3c; }
+  .fail { color: #b3261e; font-weight: bold; }
+  summary { cursor: pointer; padding: 0.4rem 0; font-family: "Segoe UI", Arial, sans-serif; }
+  .err { color: #b3261e; margin: 0 0 0 1.5rem; white-space: pre-wrap; }
+  #summary { font-family: "Segoe UI", Arial, sans-serif; font-weight: bold; border: 2px solid #2f5a78; padding: 0.6rem 1rem; border-radius: 8px; background: #eef4f8; }
+</style>
+</head>
+<body>
+<h1>Royalty math tests</h1>
+<p>Running entirely in your browser — nothing is uploaded and nothing leaves this folder.</p>
+<p id="summary">running…</p>
+<div id="results"></div>
+<script src="../royalty-math.js"></script>
+<script src="royalty-tests.js"></script>
+<script>
+(function () {
+  "use strict";
+  var results = document.getElementById("results");
+  var summary = document.getElementById("summary");
+  var passed = 0, failed = 0, ran = 0;
+
+  function assert(condition, message) {
+    if (condition) return;
+    throw new Error(message || "assertion failed");
+  }
+  function equal(actual, expected, message) {
+    if (actual === expected && typeof actual === typeof expected) return;
+    throw new Error((message || "not equal") + ": expected [" + expected + "], got [" + actual + "]");
+  }
+  function test(name, fn) {
+    ran++;
+    var details = document.createElement("details");
+    var label = document.createElement("summary");
+    label.textContent = name;
+    details.appendChild(label);
+    try {
+      fn();
+      passed++;
+      label.classList.add("ok");
+      label.textContent += " — ✔ passed";
+    } catch (err) {
+      failed++;
+      label.classList.add("fail");
+      label.textContent += " — ✘ failed";
+      var err = document.createElement("p");
+      err.className = "err";
+      err.textContent = err && err.message ? err.message : String(err);
+      details.appendChild(err);
+    }
+    results.appendChild(details);
+  }
+
+  window.RoyaltySuite.runSuite(window.KDPPriceLadderMath, {
+    assert: assert, equal: equal, test: test
+  });
+
+  summary.textContent = passed + " passed, " + failed + " failed (of " + ran + ")";
+  if (failed) {
+    summary.style.borderColor = "#b3261e";
+    summary.style.background = "#fbeeed";
+  }
+  if (window.location.hash === "#selfcheck") {
+    document.title = (failed ? "FAIL" : "PASS") + " " + passed + "/" + ran;
+  }
+})();
+</script>
+</body>
+</html>
